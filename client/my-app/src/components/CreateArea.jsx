@@ -5,6 +5,7 @@ import Zoom from '@mui/material/Zoom';
 
 function CreateArea(props) {
   const [isExpanded, setExpanded] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const [note, setNote] = useState({
     title: "",
@@ -27,7 +28,7 @@ function CreateArea(props) {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(note)  // Ensure both title and content are included
+      body: JSON.stringify(note)
     })
     .then(response => response.json())
     .then(newNote => {
@@ -36,8 +37,12 @@ function CreateArea(props) {
         title: "",
         content: ""
       });
+      setErrorMessage(''); // Clear any previous error messages
     })
-    .catch(error => console.error("Error adding note:", error));
+    .catch(error => {
+      console.error("Error adding note:", error);
+      setErrorMessage('Failed to add note');
+    });
   }
 
   function expand() {
@@ -68,6 +73,7 @@ function CreateArea(props) {
             <AddIcon />
           </Fab>
         </Zoom>
+        {errorMessage && <p className="error">{errorMessage}</p>}
       </form>
     </div>
   );

@@ -7,7 +7,7 @@ import pg from "pg";
 dotenv.config();
 
 const app = express();
-const port =  5000;
+const port = process.env.PORT || 5000;
 
 const db = new pg.Client({
   user: process.env.DB_USER,
@@ -33,14 +33,15 @@ app.use(express.json());
 // Create a note
 app.post("/notes", async (req, res) => {
   try {
-    const { title, content } = req.body; // Destructure content as well
+    const { title, content } = req.body;
     const result = await db.query(
       "INSERT INTO notes (title, content) VALUES ($1, $2) RETURNING *",
       [title, content]
     );
-    res.json(result.rows[0]);
+    res.status(201).json(result.rows[0]);
   } catch (err) {
     console.log(err.message);
+    res.status(500).send("Server error");
   }
 });
 
@@ -48,26 +49,26 @@ app.post("/notes", async (req, res) => {
 app.get("/notes", async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM notes");
-    res.json(result.rows);
+    res.status(200).json(result.rows);
   } catch (err) {
     console.log(err.message);
+    res.status(500).send("Server error");
   }
 });
-
-
 
 // Update a note
 app.put("/notes/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content } = req.body; // Destructure content as well
+    const { title, content } = req.body;
     const result = await db.query(
       "UPDATE notes SET title = $1, content = $2 WHERE id = $3 RETURNING *",
       [title, content, id]
     );
-    res.json(result.rows[0]);
+    res.status(200).json(result.rows[0]);
   } catch (err) {
     console.log(err.message);
+    res.status(500).send("Server error");
   }
 });
 
@@ -76,12 +77,13 @@ app.delete("/notes/:id", async (req, res) => {
   try {
     const { id } = req.params;
     await db.query("DELETE FROM notes WHERE id = $1", [id]);
-    res.json("Note is deleted");
+    res.status(200).send("Note is deleted");
   } catch (err) {
     console.log(err.message);
+    res.status(500).send("Server error");
   }
 });
 
-app.listen(5000, () => {
+app.listen(port, () => {
   console.log(`Server is started on port ${port}`);
 });

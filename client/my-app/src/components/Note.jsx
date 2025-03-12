@@ -7,6 +7,7 @@ function Note (props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(props.title);
   const [editedContent, setEditedContent] = useState(props.content);
+  const [errorMessage, setErrorMessage] = useState('');
 
   function handleEditClick() {
     setIsEditing(true);
@@ -24,8 +25,12 @@ function Note (props) {
     .then(updatedNote => {
       props.onEdit(props.id, updatedNote.title, updatedNote.content);
       setIsEditing(false);
+      setErrorMessage(''); // Clear any previous error messages
     })
-    .catch(error => console.error("Error editing note:", error));
+    .catch(error => {
+      console.error("Error editing note:", error);
+      setErrorMessage('Failed to save changes');
+    });
   }
 
   function handleDeleteClick() {
@@ -34,8 +39,12 @@ function Note (props) {
     })
     .then(() => {
       props.onDelete(props.id);
+      setErrorMessage(''); // Clear any previous error messages
     })
-    .catch(error => console.error("Error deleting note:", error));
+    .catch(error => {
+      console.error("Error deleting note:", error);
+      setErrorMessage('Failed to delete note');
+    });
   }
 
   return (
@@ -63,6 +72,7 @@ function Note (props) {
           <button className="delete-button" onClick={handleDeleteClick}><DeleteIcon /></button> {/* Delete button */}
         </div>
       )}
+      {errorMessage && <p className="error">{errorMessage}</p>}
     </div>
   );
 }
